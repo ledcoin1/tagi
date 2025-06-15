@@ -181,15 +181,14 @@ async def websocket_endpoint(ws: WebSocket):
 async def game_loop():
     while True:
         create_new_round()
-        round = get_current_round()
-        if not round:
+        current_round = get_current_round()
+        if not current_round:
             await asyncio.sleep(1)
             continue
-        round_id, _, start_time, crash_point = round
+        round_id, _, start_time, crash_point = current_round
 
         await broadcast({"status": "waiting", "countdown": int(start_time - time.time())})
 
-        # WAIT BEFORE FLIGHT
         while time.time() < start_time:
             await broadcast({"status": "waiting", "countdown": int(start_time - time.time())})
             await asyncio.sleep(1)
@@ -198,7 +197,6 @@ async def game_loop():
         start_time = time.time()
         coef = 1.0
 
-        # FLIGHT
         while coef < crash_point:
             coef += 0.01
             await broadcast({"status": "running", "coefficient": round(coef, 2)})
@@ -207,6 +205,7 @@ async def game_loop():
         update_round_status(round_id, "ended")
         await broadcast({"status": "ended", "final_coef": round(coef, 2)})
         await asyncio.sleep(3)
+
 
 async def broadcast(message: dict):
     to_remove = []

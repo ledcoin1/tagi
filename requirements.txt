@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pydantic
+sqlite3 
+aiofiles
+python-multipart
